@@ -1,16 +1,23 @@
-# lyrix
+# Lyrix 🎵
 
-A new Flutter project.
+Lyrix is a cross-platform (Flutter) lyrics display app that syncs text with music playback.
+The goal is to show real-time lyrics on lock-screen / AOD-style UI on Android.
 
-## Getting Started
+### 🚀 Current Progress (Phase 1)
+- Fake synced lyrics demo screen
+- Smooth scrolling + active line highlight
+- Dark immersive UI
 
-This project is a starting point for a Flutter application.
+### 🛠 Upcoming Features
+- Read currently-playing song from device (Android notification listener)
+- Fetch real online lyrics
+- Lock-screen notification lyrics display (Android)
+- Overlay mode / AOD-style experience
 
-A few resources to get you started if this is your first Flutter project:
+### 🧰 Tech Stack
+- Flutter (Dart) UI + logic
+- Kotlin (Native Android integration – upcoming)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This is a personal project for learning + portfolio.
