@@ -1,122 +1,242 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LyrixApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LyrixApp extends StatelessWidget {
+  const LyrixApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      title: 'Lyrix',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF050608),
+        textTheme: ThemeData.dark().textTheme.apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LyrixDemoScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class LyricLine {
+  final Duration time;
+  final String text;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  LyricLine(this.time, this.text);
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class LyrixDemoScreen extends StatefulWidget {
+  const LyrixDemoScreen({super.key});
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  @override
+  State<LyrixDemoScreen> createState() => _LyrixDemoScreenState();
+}
+
+class _LyrixDemoScreenState extends State<LyrixDemoScreen> {
+  final List<LyricLine> _lyrics = [
+    LyricLine(const Duration(seconds: 0),  "Close your eyes, feel the sound,"),
+    LyricLine(const Duration(seconds: 4),  "Let the city fade to black,"),
+    LyricLine(const Duration(seconds: 8),  "Every heartbeat, every line,"),
+    LyricLine(const Duration(seconds: 12), "Singing words we can’t take back,"),
+    LyricLine(const Duration(seconds: 16), "This is our late-night echo,"),
+    LyricLine(const Duration(seconds: 20), "Floating on a neon sky,"),
+    LyricLine(const Duration(seconds: 24), "If the world forgets tomorrow,"),
+    LyricLine(const Duration(seconds: 28), "Lyrix keeps the song alive."),
+  ];
+
+  Duration _currentPosition = Duration.zero;
+  Timer? _timer;
+  int _currentIndex = 0;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _startFakePlayback();
+  }
+
+  void _startFakePlayback() {
+    _timer?.cancel();
+    _currentPosition = Duration.zero;
+    _currentIndex = 0;
+
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _currentPosition += const Duration(milliseconds: 500);
+        _updateCurrentIndex();
+      });
     });
+  }
+
+  void _updateCurrentIndex() {
+    int newIndex = _currentIndex;
+
+    for (int i = 0; i < _lyrics.length; i++) {
+      final isLast = i == _lyrics.length - 1;
+      final start = _lyrics[i].time;
+      final end = isLast ? start + const Duration(seconds: 4) : _lyrics[i + 1].time;
+
+      if (_currentPosition >= start && _currentPosition < end) {
+        newIndex = i;
+        break;
+      }
+    }
+
+    if (newIndex != _currentIndex) {
+      _currentIndex = newIndex;
+
+      // Smooth scroll to keep current line near center
+      _scrollController.animateTo(
+        (_currentIndex * 48).toDouble(), // approx height per item
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _restartDemo() {
+    _startFakePlayback();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('Lyrix • Demo'),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.black,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Song info card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF8E2DE2),
+                            Color(0xFF4A00E0),
+                          ],
+                        ),
+                      ),
+                      child: const Icon(Icons.music_note, size: 32),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Late Night Echo',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Demo Artist • Fake playback',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Lyrics list
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.02),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    itemCount: _lyrics.length,
+                    itemBuilder: (context, index) {
+                      final line = _lyrics[index];
+                      final isActive = index == _currentIndex;
+
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        alignment: Alignment.center,
+                        child: Opacity(
+                          opacity: isActive ? 1 : 0.45,
+                          child: Text(
+                            line.text,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isActive ? 20 : 16,
+                              fontWeight:
+                              isActive ? FontWeight.w600 : FontWeight.w400,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Controls
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton.icon(
+                    onPressed: _restartDemo,
+                    icon: const Icon(Icons.replay),
+                    label: const Text('Restart demo'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
