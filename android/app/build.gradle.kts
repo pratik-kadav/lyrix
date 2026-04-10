@@ -8,15 +8,17 @@ plugins {
 android {
     namespace = "com.pratikkadav.lyrix.lyrix"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "11" //JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
@@ -37,8 +39,25 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    applicationVariants.all {
+        outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            val versionName = defaultConfig.versionName
+            val variantName = name
+            if (variantName == "release") {
+                output.outputFileName = "Lyrix_v$versionName.apk"
+            }
+        }
+    }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("androidx.palette:palette:1.0.0")
+    // 3. ADD THIS LINE
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
