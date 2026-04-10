@@ -43,17 +43,17 @@ Lyrix is built on a hybrid architecture, prioritizing performance by keeping hea
 
 2. Navigate to the project directory:
 
-    Bash
+   ```bash
     cd lyrix
 
 3. Install dependencies:
 
-    Bash
+   ```bash
     flutter pub get
 
 4. Run the app:
 
-    Bash
+   ```bash
     flutter run
 
 Note: On first launch, Lyrix requires Android Notification Access permissions to intercept system media controllers. You will also need to grant Draw Over Other Apps permission to enable the immersive Lockscreen mode.
